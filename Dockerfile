@@ -1,28 +1,30 @@
-# Use the official Python base image (slim version က ပိုပေါ့ပါးတယ်)
+# Official slim Python image သုံးပါ (ပေါ့ပါးပြီး လုံခြုံတယ်)
 FROM python:3.11.7-slim
 
-# Set the working directory inside the container
+# Working directory သတ်မှတ်ပါ
 WORKDIR /app
 
-# Install system dependencies လိုအပ်ရင်ပဲ ထည့်ပါ (Telegram bot အတွက် တခါတလေ လိုတတ်တယ်)
+# System dependencies လိုအပ်ရင် ထည့်ပါ (gcc နဲ့ python-dev က Telegram bot အတွက် တခါတလေ လိုတတ်တယ်)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first → ဒါက layer caching ကို ကောင်းကောင်း အသုံးချနိုင်တယ်
+# Requirements အရင်ကော်ပီ → caching ကောင်းအောင်
 COPY requirements.txt .
 
-# Install Python dependencies
+# Dependencies ထည့်ပါ
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# ကျန်တဲ့ code အားလုံး ကော်ပီ
 COPY . .
 
-# Railway.app နဲ့ အလားတူ platform တွေအတွက် PORT ကို environment variable အနေနဲ့ ထားတယ်
-# Local မှာ run တဲ့အခါ fallback အနေနဲ့ 8080 သုံးမယ်
+# Optional: local testing အတွက် fallback
 ENV PORT=8080
 
-# CMD ကို shell form နဲ့ ရေးထားတယ် → ဒါမှ $PORT ကို အလုပ်လုပ်မယ်
-# ${PORT:-8080} ဆိုတာက PORT မရှိရင် 8080 ကို fallback လုပ်ပေးတယ်
+# EXPOSE ထည့်ထားရင် ပိုကောင်းတယ် (Railway က မလိုအပ်ပေမယ့် ကောင်းတယ်)
+EXPOSE 8080
+
+# Shell form နဲ့ ရေးပါ → $PORT ကို expand လုပ်ပေးမယ်
+# ${PORT:-8080} ဆိုတာ PORT မရှိရင် 8080 ကို သုံးမယ်
 CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
