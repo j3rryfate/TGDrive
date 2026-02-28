@@ -11,8 +11,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code to the working directory
 COPY . .
 
-# Expose the port on which the application will run
+# Railway နဲ့ Zeabur အတွက် Port ကို အရှင် (Dynamic) ထားပေးရပါမယ်
+# Default အနေနဲ့ 8080 ကို သတ်မှတ်ထားပေးပါတယ်
+ENV PORT=8080
+
+# Expose the port (Documentation purposes)
 EXPOSE 8080
 
-# Run the FastAPI application using uvicorn server
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form ကို သုံးပြီး $PORT variable ကို တိုက်ရိုက်ယူသုံးခြင်း
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT}
